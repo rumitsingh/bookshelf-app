@@ -93,20 +93,20 @@
         <div class="modal-overlay" onclick="closeModal('menuModal')"></div>
         <div class="modal-content sort-modal">
             <h2>Menu</h2>
-            <div class="sort-options">
-                <button id="sortMenuBtn" class="sort-option">
+            <div class="menu-options">
+                <button id="sortMenuBtn" class="menu-option">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px;">
                         <path d="M3 6h18M7 12h10M11 18h2"/>
                     </svg>
                     Sort Books
                 </button>
-                <button id="exportBtn" class="sort-option">
+                <button id="exportBtn" class="menu-option">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px;">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m14-7l-5-5m0 0L7 8m5-5v12"/>
                     </svg>
                     Export Books
                 </button>
-                <button id="importBtn" class="sort-option">
+                <button id="importBtn" class="menu-option">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px;">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m4-5l5 5m0 0l5-5m-5 5V3"/>
                     </svg>
@@ -119,7 +119,7 @@
 
     <!-- Sort Modal -->
     <div id="sortModal" class="modal" style="display: none;">
-        <div class="modal-overlay"></div>
+        <div class="modal-overlay" onclick="closeModal('sortModal')"></div>
         <div class="modal-content sort-modal">
             <h2>Sort By</h2>
             <div class="sort-options">
@@ -135,7 +135,7 @@
 
     <!-- Import Confirmation Modal -->
     <div id="importModal" class="modal" style="display: none;">
-        <div class="modal-overlay"></div>
+        <div class="modal-overlay" onclick="closeModal('importModal')"></div>
         <div class="modal-content import-modal">
             <h2>Import Books</h2>
             <p class="import-info">
