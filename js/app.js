@@ -209,8 +209,8 @@ function setupEventListeners() {
     document.getElementById('replaceAllBtn').onclick = () => importBooks('replace');
     document.getElementById('mergeBtn').onclick = () => importBooks('merge');
 
-    // Sort options
-    document.querySelectorAll('.sort-option').forEach(btn => {
+    // Sort options - ONLY attach to sort modal buttons
+    document.querySelectorAll('#sortModal .sort-option').forEach(btn => {
         btn.onclick = () => {
             currentSortOption = btn.dataset.sort;
             displayBooks(currentBooks);
