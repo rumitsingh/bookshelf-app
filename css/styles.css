@@ -524,6 +524,72 @@ body {
     font-weight: 600;
 }
 
+/* Import Modal */
+.import-modal {
+    max-height: 70vh;
+}
+
+.import-info {
+    font-size: 16px;
+    color: var(--color-text);
+    margin: 16px 0 8px 0;
+    padding: 12px;
+    background: var(--color-card-bg);
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+
+.import-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: var(--color-bg);
+    border: 2px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-family);
+    text-align: left;
+}
+
+.option-btn:active {
+    border-color: var(--color-primary);
+    background: var(--color-bg-secondary);
+}
+
+.option-btn svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--color-primary);
+}
+
+.option-btn div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.option-btn strong {
+    font-size: 17px;
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.option-btn small {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    font-weight: 400;
+    line-height: 1.4;
+}
+
 /* Book Preview */
 .book-preview {
     margin-top: 20px;
