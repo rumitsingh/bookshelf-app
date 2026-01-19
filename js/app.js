@@ -4,6 +4,7 @@ let currentSortOption = 'genre';
 let currentSearchQuery = '';
 let currentBookForAction = null;
 let fetchedBookData = null;
+let importFileData = null;
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', async () => {
@@ -188,9 +189,25 @@ function createPlaceholderCover(title) {
 // Setup Event Listeners
 function setupEventListeners() {
     // Navigation buttons
-    document.getElementById('sortBtn').onclick = () => openModal('sortModal');
+    document.getElementById('menuBtn').onclick = () => openModal('menuModal');
     document.getElementById('addBtn').onclick = () => openAddBookModal();
     document.getElementById('addFirstBook').onclick = () => openAddBookModal();
+
+    // Menu options
+    document.getElementById('sortMenuBtn').onclick = () => {
+        closeModal('menuModal');
+        openModal('sortModal');
+    };
+    document.getElementById('exportBtn').onclick = exportBooks;
+    document.getElementById('importBtn').onclick = () => {
+        closeModal('menuModal');
+        document.getElementById('importFileInput').click();
+    };
+
+    // Import file handling
+    document.getElementById('importFileInput').onchange = handleImportFile;
+    document.getElementById('replaceAllBtn').onclick = () => importBooks('replace');
+    document.getElementById('mergeBtn').onclick = () => importBooks('merge');
 
     // Sort options
     document.querySelectorAll('.sort-option').forEach(btn => {
@@ -525,4 +542,94 @@ function showToast(message, type = 'info') {
     setTimeout(() => {
         toast.remove();
     }, 3000);
+}
+
+// Export Books
+async function exportBooks() {
+    try {
+        const books = await storage.getAllBooks();
+
+        if (books.length === 0) {
+            showToast('No books to export', 'error');
+            closeModal('menuModal');
+            return;
+        }
+
+        showLoading(true);
+        const json = await storage.exportToJSON();
+
+        // Create download
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bookshelf-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        closeModal('menuModal');
+        showToast(`Exported ${books.length} books successfully!`, 'success');
+    } catch (error) {
+        console.error('Export failed:', error);
+        showToast('Failed to export books', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Handle Import File Selection
+async function handleImportFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        showLoading(true);
+        const text = await file.text();
+        const data = JSON.parse(text);
+
+        if (!data.books || !Array.isArray(data.books)) {
+            throw new Error('Invalid backup file');
+        }
+
+        // Store data temporarily
+        importFileData = data;
+
+        // Show info in modal
+        document.getElementById('importFileInfo').textContent =
+            `Found ${data.books.length} book${data.books.length !== 1 ? 's' : ''} from ${new Date(data.exportDate).toLocaleDateString()}`;
+
+        // Show import modal
+        openModal('importModal');
+    } catch (error) {
+        console.error('Import file error:', error);
+        showToast('Invalid backup file', 'error');
+    } finally {
+        showLoading(false);
+        event.target.value = ''; // Reset file input
+    }
+}
+
+// Import Books
+async function importBooks(mode) {
+    if (!importFileData) return;
+
+    try {
+        showLoading(true);
+        const result = await storage.importFromJSON(importFileData, mode);
+
+        await loadAndDisplayBooks();
+        closeModal('importModal');
+
+        const modeText = mode === 'replace' ? 'Replaced all books with' : 'Merged';
+        showToast(`${modeText} ${result.imported} imported books!`, 'success');
+
+        importFileData = null;
+    } catch (error) {
+        console.error('Import failed:', error);
+        showToast(error.message || 'Failed to import books', 'error');
+    } finally {
+        showLoading(false);
+    }
 }
