@@ -117,6 +117,54 @@ class BookStorage {
         });
     }
 
+    // Export all books to JSON
+    async exportToJSON() {
+        const books = await this.getAllBooks();
+        const exportData = {
+            books: books,
+            exportDate: new Date().toISOString(),
+            totalBooks: books.length,
+            version: '1.0'
+        };
+        return JSON.stringify(exportData, null, 2);
+    }
+
+    // Import books from JSON
+    async importFromJSON(jsonData, mode = 'replace') {
+        try {
+            const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+
+            if (!data.books || !Array.isArray(data.books)) {
+                throw new Error('Invalid backup file format');
+            }
+
+            if (mode === 'replace') {
+                // Clear all existing books
+                const existingBooks = await this.getAllBooks();
+                for (const book of existingBooks) {
+                    await this.deleteBook(book.id);
+                }
+            }
+
+            // Import all books
+            let importedCount = 0;
+            for (const book of data.books) {
+                // Remove the id to avoid conflicts (IndexedDB will auto-generate)
+                const { id, ...bookWithoutId } = book;
+                await this.addBook(bookWithoutId);
+                importedCount++;
+            }
+
+            return {
+                success: true,
+                imported: importedCount,
+                mode: mode
+            };
+        } catch (error) {
+            throw new Error('Failed to import books: ' + error.message);
+        }
+    }
+
     // Import mock data (first launch only)
     async importMockData() {
         const books = await this.getAllBooks();
