@@ -524,6 +524,37 @@ body {
     font-weight: 600;
 }
 
+/* Menu Modal */
+.menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 0;
+}
+
+.menu-option {
+    padding: 16px 20px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--color-divider);
+    font-size: 17px;
+    color: var(--color-text);
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-family);
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.menu-option:last-child {
+    border-bottom: none;
+}
+
+.menu-option:active {
+    background: var(--color-bg-secondary);
+}
+
 /* Import Modal */
 .import-modal {
     max-height: 70vh;
