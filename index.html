@@ -26,10 +26,9 @@
         <!-- Navigation Bar -->
         <nav class="navbar">
             <div class="nav-content">
-                <button id="sortBtn" class="nav-btn" aria-label="Sort">
+                <button id="menuBtn" class="nav-btn" aria-label="Menu">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18M7 12h10M11 18h2"/>
-                        <path d="M12 3v3m0 12v3"/>
+                        <path d="M3 12h18M3 6h18M3 18h18"/>
                     </svg>
                 </button>
                 <h1 class="nav-title">My Bookshelf</h1>
@@ -89,6 +88,35 @@
         </div>
     </div>
 
+    <!-- Menu Modal -->
+    <div id="menuModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeModal('menuModal')"></div>
+        <div class="modal-content sort-modal">
+            <h2>Menu</h2>
+            <div class="sort-options">
+                <button id="sortMenuBtn" class="sort-option">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px;">
+                        <path d="M3 6h18M7 12h10M11 18h2"/>
+                    </svg>
+                    Sort Books
+                </button>
+                <button id="exportBtn" class="sort-option">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m14-7l-5-5m0 0L7 8m5-5v12"/>
+                    </svg>
+                    Export Books
+                </button>
+                <button id="importBtn" class="sort-option">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m4-5l5 5m0 0l5-5m-5 5V3"/>
+                    </svg>
+                    Import Books
+                </button>
+            </div>
+            <button class="cancel-btn" onclick="closeModal('menuModal')">Cancel</button>
+        </div>
+    </div>
+
     <!-- Sort Modal -->
     <div id="sortModal" class="modal" style="display: none;">
         <div class="modal-overlay"></div>
@@ -104,6 +132,49 @@
             <button class="cancel-btn" onclick="closeModal('sortModal')">Cancel</button>
         </div>
     </div>
+
+    <!-- Import Confirmation Modal -->
+    <div id="importModal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content import-modal">
+            <h2>Import Books</h2>
+            <p class="import-info">
+                <strong id="importFileInfo"></strong>
+            </p>
+            <p style="margin-bottom: 20px; color: #666;">
+                Choose how to import these books:
+            </p>
+            <div class="import-options">
+                <button id="replaceAllBtn" class="option-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <line x1="22" y1="11" x2="16" y2="11"/>
+                    </svg>
+                    <div>
+                        <strong>Replace All Books</strong>
+                        <small>Delete current books and import new ones</small>
+                    </div>
+                </button>
+                <button id="mergeBtn" class="option-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <div>
+                        <strong>Merge with Current Books</strong>
+                        <small>Keep existing books and add imported ones</small>
+                    </div>
+                </button>
+            </div>
+            <button class="cancel-btn" onclick="closeModal('importModal')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="importFileInput" accept=".json" style="display: none;">
 
     <!-- Add Book Modal -->
     <div id="addBookModal" class="modal" style="display: none;">
