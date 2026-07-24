@@ -313,14 +313,20 @@ async function fetchBookMetadata() {
     showLoading(true);
 
     try {
-        // Extract ISBN
-        const isbn = URLParser.extractISBN(urlInput);
-        if (!isbn) {
-            throw new Error('Could not extract ISBN from URL. Try entering the ISBN directly or use manual entry.');
-        }
+        let bookData;
 
-        // Fetch book data
-        const bookData = await openLibraryAPI.fetchBook(isbn, yearInput);
+        // Try ISBN extraction first
+        const isbn = URLParser.extractISBN(urlInput);
+        if (isbn) {
+            bookData = await openLibraryAPI.fetchBook(isbn, yearInput);
+        } else {
+            // Fall back to title search (handles Amazon search URLs, plain titles, etc.)
+            const query = URLParser.extractSearchQuery(urlInput) || urlInput;
+            if (!query) {
+                throw new Error('Could not extract ISBN from URL. Try entering the ISBN directly or use manual entry.');
+            }
+            bookData = await openLibraryAPI.fetchBookByTitle(query, yearInput);
+        }
         fetchedBookData = bookData;
 
         // Show preview
@@ -633,3 +639,4 @@ async function importBooks(mode) {
         showLoading(false);
     }
 }
+
