@@ -2,7 +2,9 @@
 class OpenLibraryAPI {
     constructor() {
         this.baseURL = 'https://openlibrary.org/api/books';
+        this.searchURL = 'https://openlibrary.org/search.json';
         this.coverURL = 'https://covers.openlibrary.org/b/isbn';
+        this.coverIdURL = 'https://covers.openlibrary.org/b/id';
     }
 
     // Fetch book by ISBN
@@ -20,14 +22,48 @@ class OpenLibraryAPI {
             const key = `ISBN:${cleanISBN}`;
 
             if (!data[key]) {
-                throw new Error('Book not found in Open Library');
+                // Fallback: try search API which has broader coverage
+                return await this.searchByISBN(cleanISBN, yearRead);
             }
 
-            const bookData = data[key];
-            return this.parseBookData(bookData, cleanISBN, yearRead);
+            return this.parseBookData(data[key], cleanISBN, yearRead);
         } catch (error) {
+            if (error.message.includes('not found') || error.message.includes('manual entry')) {
+                throw error;
+            }
             throw new Error(`Failed to fetch book: ${error.message}`);
         }
+    }
+
+    // Fallback: search Open Library by ISBN using the search API
+    async searchByISBN(isbn, yearRead) {
+        const url = `${this.searchURL}?isbn=${isbn}&limit=1&fields=title,author_name,subject,first_publish_year,cover_i`;
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Book not found. Try manual entry instead.');
+        }
+
+        const data = await response.json();
+        if (!data.docs || data.docs.length === 0) {
+            throw new Error('Book not found in Open Library. Try manual entry instead.');
+        }
+
+        const doc = data.docs[0];
+        const coverURL = doc.cover_i
+            ? `${this.coverIdURL}/${doc.cover_i}-L.jpg`
+            : `${this.coverURL}/${isbn}-L.jpg`;
+
+        return {
+            title: doc.title || 'Untitled',
+            author: doc.author_name?.[0] || 'Unknown Author',
+            isbn,
+            coverImageURL: coverURL,
+            yearRead: parseInt(yearRead),
+            publicationYear: doc.first_publish_year || null,
+            genre: doc.subject?.[0] || null,
+            notes: null
+        };
     }
 
     // Parse API response to book object
@@ -141,11 +177,12 @@ class URLParser {
             const match = url.match(pattern);
             if (match) {
                 const asin = match[1];
-                // Amazon ASINs that start with digits are often ISBN-10
+                // Only numeric ASINs are ISBNs — B-prefixed ASINs are Kindle/digital editions
                 if (/^\d/.test(asin)) {
                     return asin;
                 }
-                return asin;
+                // B-prefixed ASIN: not an ISBN, can't look up in Open Library
+                return null;
             }
         }
 
