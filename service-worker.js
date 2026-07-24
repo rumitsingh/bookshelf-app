@@ -1,5 +1,5 @@
 // Service Worker for Offline Support and PWA Features
-const CACHE_NAME = 'bookshelf-v1';
+const CACHE_NAME = 'bookshelf-v2';
 const urlsToCache = [
     './',
     './index.html',
