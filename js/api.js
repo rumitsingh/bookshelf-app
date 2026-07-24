@@ -49,10 +49,33 @@ class OpenLibraryAPI {
             throw new Error('Book not found in Open Library. Try manual entry instead.');
         }
 
+        return this.parseSearchDoc(data.docs[0], isbn, yearRead);
+    }
+
+    // Search Open Library by title/query string
+    async fetchBookByTitle(query, yearRead) {
+        const url = `${this.searchURL}?q=${encodeURIComponent(query)}&limit=1&fields=title,author_name,subject,first_publish_year,cover_i,isbn`;
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Search failed. Try manual entry instead.');
+        }
+
+        const data = await response.json();
+        if (!data.docs || data.docs.length === 0) {
+            throw new Error('No book found for that search. Try entering the ISBN directly or use manual entry.');
+        }
+
         const doc = data.docs[0];
+        const isbn = doc.isbn?.[0] || '';
+        return this.parseSearchDoc(doc, isbn, yearRead);
+    }
+
+    // Parse a search.json doc into a book object
+    parseSearchDoc(doc, isbn, yearRead) {
         const coverURL = doc.cover_i
             ? `${this.coverIdURL}/${doc.cover_i}-L.jpg`
-            : `${this.coverURL}/${isbn}-L.jpg`;
+            : (isbn ? `${this.coverURL}/${isbn}-L.jpg` : '');
 
         return {
             title: doc.title || 'Untitled',
@@ -66,7 +89,7 @@ class OpenLibraryAPI {
         };
     }
 
-    // Parse API response to book object
+    // Parse /api/books response to book object
     parseBookData(data, isbn, yearRead) {
         const title = data.title || 'Untitled';
         const author = data.authors && data.authors.length > 0
@@ -139,6 +162,22 @@ class URLParser {
         return this.extractDirectISBN(trimmedInput);
     }
 
+    // Extract a title search query from URLs that don't contain an ISBN
+    static extractSearchQuery(input) {
+        try {
+            const parsed = new URL(input.trim());
+            // Amazon search results: ?k=thinking+fast+and+slow
+            if (parsed.hostname.includes('amazon') && parsed.searchParams.has('k')) {
+                return parsed.searchParams.get('k');
+            }
+            // Google Books search: ?q=...
+            if (parsed.hostname.includes('google') && parsed.searchParams.has('q')) {
+                return parsed.searchParams.get('q');
+            }
+        } catch (e) {}
+        return null;
+    }
+
     static extractDirectISBN(text) {
         // ISBN-13: 978 or 979 followed by 10 digits
         const isbn13Match = text.match(/\b(97[89][\d\-\s]{10,})\b/);
@@ -191,8 +230,6 @@ class URLParser {
     }
 
     static extractFromGoodreads(url) {
-        // Goodreads doesn't expose ISBN in URLs easily
-        // Try to find ISBN in the URL parameters or text
         return this.extractDirectISBN(url);
     }
 
@@ -202,8 +239,6 @@ class URLParser {
         if (isbnParam) {
             return isbnParam[1];
         }
-
-        // Fallback to direct extraction
         return this.extractDirectISBN(url);
     }
 
@@ -213,19 +248,16 @@ class URLParser {
         if (isbnMatch) {
             return isbnMatch[1].replace(/[-\s]/g, '');
         }
-
         return this.extractDirectISBN(url);
     }
 
     static isValidISBN(isbn) {
         const cleaned = isbn.replace(/[-\s]/g, '');
 
-        // ISBN-10: 10 characters
         if (cleaned.length === 10) {
             return true;
         }
 
-        // ISBN-13: 13 characters starting with 978 or 979
         if (cleaned.length === 13 && (cleaned.startsWith('978') || cleaned.startsWith('979'))) {
             return true;
         }
